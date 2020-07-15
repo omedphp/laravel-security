@@ -5,7 +5,7 @@ namespace Omed\Laravel\Security;
 
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Omed\Laravel\User\Model\User;
-use Omed\Laravel\User\Passport;
+use Laravel\Passport\Passport;
 use Omed\Laravel\User\Policies\ModelPolicy;
 
 class SecurityServiceProvider extends ServiceProvider
@@ -27,7 +27,6 @@ class SecurityServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->registerPolicies();
-
         Passport::routes();
     }
 
