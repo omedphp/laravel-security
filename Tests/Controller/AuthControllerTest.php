@@ -11,9 +11,9 @@
 
 declare(strict_types=1);
 
-namespace Tests\Omed\Laravel\Security\Controller;
+namespace Omed\Laravel\Security\Tests\Controller;
 
-use Tests\Omed\Laravel\User\UserTestCase;
+use Omed\Laravel\User\Tests\UserTestCase;
 
 class AuthControllerTest extends UserTestCase
 {
