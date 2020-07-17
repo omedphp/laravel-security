@@ -51,7 +51,7 @@ class SecurityServiceProvider extends ServiceProvider
         config([
             'doctrine.managers.default.paths' => array_merge(
                 [__DIR__.'/Model'],
-                config('doctrine.managers.default.paths',[])
+                config('doctrine.managers.default.paths', [])
             ),
         ]);
     }
