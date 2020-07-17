@@ -28,11 +28,11 @@ class SecurityServiceProvider extends ServiceProvider
 
         $this->loadRoutesFrom(__DIR__.'/Resources/routes/api.php');
         $this->resolveTargetEntity();
+        $this->registerDoctrine();
     }
 
     public function register()
     {
-        $this->registerDoctrine();
     }
 
     private function resolveTargetEntity()
@@ -49,19 +49,10 @@ class SecurityServiceProvider extends ServiceProvider
     private function registerDoctrine()
     {
         config([
-            'doctrine.managers.omed_security' => [
-                'connection' => config('sanctum_orm.doctrine.connection'),
-                'dev' => config('app.debug', false),
-                'type' => 'annotations',
-                'paths' => [
-                    __DIR__.'/Model',
-                ],
-                'proxies' => [
-                    'namespace' => false,
-                    'path' => storage_path('proxies'),
-                    'auto_generate' => false,
-                ],
-            ],
+            'doctrine.managers.default.paths' => array_merge(
+                [__DIR__.'/Model'],
+                config('doctrine.managers.default.paths',[])
+            ),
         ]);
     }
 }

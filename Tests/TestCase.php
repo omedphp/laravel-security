@@ -13,13 +13,11 @@ declare(strict_types=1);
 
 namespace Omed\Laravel\Security\Tests;
 
-use Kilip\SanctumORM\Contracts\SanctumUserInterface;
 use Kilip\SanctumORM\SanctumORMServiceProvider;
 use Laravel\Sanctum\SanctumServiceProvider;
 use LaravelDoctrine\Extensions\GedmoExtensionsServiceProvider;
 use LaravelDoctrine\ORM\DoctrineServiceProvider;
 use Omed\Laravel\ORM\ORMServiceProvider;
-use Omed\Laravel\ORM\Resolvers\TargetEntityResolver;
 use Omed\Laravel\Security\Model\Tokens;
 use Omed\Laravel\Security\SecurityServiceProvider;
 use Omed\Laravel\Security\Tests\Resources\Model\TestSecurityUser;
@@ -31,12 +29,6 @@ class TestCase extends BaseTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        /** @var TargetEntityResolver $resolver */
-        $resolver = $this->app->get(TargetEntityResolver::class);
-        $resolver->addResolveTargetEntity(
-            SanctumUserInterface::class,
-            TestSecurityUser::class,
-            []);
         $this->artisan('doctrine:schema:update', ['--force' => true]);
     }
 
@@ -59,9 +51,7 @@ class TestCase extends BaseTestCase
         /** @var \Illuminate\Config\Repository $config */
         $config = $app['config'];
 
-        $config->set('doctrine.managers.default.paths', [
-            __DIR__.'/Resources/Model',
-        ]);
+        $config->set('doctrine.managers.default.paths', [__DIR__.'/Resources/Model']);
 
         $config->set('auth.providers.users.driver', 'doctrine');
         $config->set('auth.providers.users.model', TestSecurityUser::class);
