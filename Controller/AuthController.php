@@ -13,87 +13,42 @@ declare(strict_types=1);
 
 namespace Omed\Laravel\Security\Controller;
 
-use Omed\Laravel\User\Controllers\Controller;
-use Omed\Laravel\User\Model\Resource\UserResource;
-use Omed\Laravel\User\Services\UserManager;
-use Omed\Laravel\User\UserEvent;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
+use Kilip\SanctumORM\Manager\TokenManagerInterface;
 
 class AuthController extends Controller
 {
     /**
-     * Create a new AuthController instance.
+     * @param Request               $request
+     * @param TokenManagerInterface $tokenManager
      *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('auth:api', ['except' => ['login']]);
-    }
-
-    /**
-     * Get a JWT via given credentials.
+     * @throws ValidationException when credentials is incorrect
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function login()
+    public function login(Request $request, TokenManagerInterface $tokenManager)
     {
-        $credentials = request(['email', 'password']);
+        $request->validate([
+            'usernameOrEmail' => ['required'],
+            'password' => ['required'],
+        ]);
 
-        if (!$token = auth()->attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+        $usernameOrEmail = $request->get('usernameOrEmail');
+        $password = $request->get('password');
+        $tokenName = $request->get('token_name', 'omed-web');
+
+        $user = $tokenManager->findUserByUsernameOrEmail($usernameOrEmail);
+
+        if (!$user || !Hash::check($password, $user->getPassword())) {
+            throw ValidationException::withMessages(['usernameOrEmail' => ['The provided credentials are incorrect.']]);
         }
 
-        event(UserEvent::LOGGED_IN, [auth()->user()]);
-        return $this->respondWithToken($token);
-    }
+        $newToken = $tokenManager->createToken($user, $tokenName);
 
-    /**
-     * @param UserManager $manager
-     *
-     * @return UserResource
-     */
-    public function me(UserManager $manager)
-    {
-        return new UserResource(auth()->user());
-    }
-
-    /**
-     * Log the user out (Invalidate the token).
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function logout()
-    {
-        $user = auth()->user();
-        auth()->logout();
-
-        event(UserEvent::LOGGED_OUT, [$user]);
-        return response()->json(['message' => 'Successfully logged out']);
-    }
-
-    /**
-     * Refresh a token.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function refresh()
-    {
-        return $this->respondWithToken(auth()->refresh());
-    }
-
-    /**
-     * Get the token array structure.
-     *
-     * @param string $token
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    protected function respondWithToken($token)
-    {
-        return response()->json([
-            'token' => $token,
-            'type' => 'bearer',
-            'expires' => auth()->factory()->getTTL() * 60,
-        ]);
+        return response()->json($newToken);
     }
 }

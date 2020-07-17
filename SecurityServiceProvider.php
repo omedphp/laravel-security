@@ -1,50 +1,68 @@
 <?php
 
+/*
+ * This file is part of the Omed project.
+ *
+ * (c) Anthonius Munthi <https://itstoni.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+declare(strict_types=1);
 
 namespace Omed\Laravel\Security;
 
-use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-use Omed\Laravel\User\Model\User;
-use Laravel\Passport\Passport;
-use Omed\Laravel\User\Policies\ModelPolicy;
+use Illuminate\Config\Repository;
+use Illuminate\Foundation\Application;
+use Illuminate\Support\ServiceProvider;
+use Kilip\SanctumORM\Contracts\TokenModelInterface;
+use Omed\Laravel\ORM\Resolvers\TargetEntityResolver;
+use Omed\Laravel\Security\Controller\AuthController;
+use Omed\Laravel\Security\Model\Tokens;
 
 class SecurityServiceProvider extends ServiceProvider
 {
-    /**
-     * The policy mappings for the application.
-     *
-     * @var array
-     */
-    protected $policies = [
-        User::class => ModelPolicy::class,
-    ];
-
-    /**
-     * Register any authentication / authorization services.
-     *
-     * @return void
-     */
-    public function boot()
+    public function boot(Application $app, Repository $config)
     {
-        $this->registerPolicies();
-        Passport::routes();
+        $app->alias(AuthController::class, 'omed.security.controller.auth');
+
+        $this->loadRoutesFrom(__DIR__.'/Resources/routes/api.php');
+        $this->resolveTargetEntity();
     }
 
     public function register()
     {
-        $this->configureAuth();
+        $this->registerDoctrine();
     }
 
-    private function configureAuth()
+    private function resolveTargetEntity()
     {
-        /** @var \Illuminate\Config\Repository $config */
-        $config = $this->app['config'];
-
-        $config->set('auth.model', User::class);
-        $config->set('auth.defaults.guard', 'api');
-        $config->set('auth.guards.api.driver', 'jwt');
-        $config->set('auth.providers.users.model', User::class);
-        $config->set('auth.providers.users.driver', 'doctrine');
+        /** @var \Omed\Laravel\ORM\Resolvers\TargetEntityResolver $resolver */
+        $resolver = $this->app->get(TargetEntityResolver::class);
+        $resolver->addResolveTargetEntity(
+            TokenModelInterface::class,
+            Tokens::class,
+            []
+        );
     }
 
+    private function registerDoctrine()
+    {
+        config([
+            'doctrine.managers.omed_security' => [
+                'connection' => config('sanctum_orm.doctrine.connection'),
+                'dev' => config('app.debug', false),
+                'type' => 'annotations',
+                'paths' => [
+                    __DIR__.'/Model',
+                ],
+                'proxies' => [
+                    'namespace' => false,
+                    'path' => storage_path('proxies'),
+                    'auto_generate' => false,
+                ],
+            ],
+        ]);
+    }
 }
