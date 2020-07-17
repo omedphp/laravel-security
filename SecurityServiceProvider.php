@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Omed\Laravel\Security;
 
-use Illuminate\Config\Repository;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Kilip\SanctumORM\Contracts\TokenModelInterface;
@@ -23,7 +22,7 @@ use Omed\Laravel\Security\Model\Tokens;
 
 class SecurityServiceProvider extends ServiceProvider
 {
-    public function boot(Application $app, Repository $config)
+    public function boot(Application $app)
     {
         $app->alias(AuthController::class, 'omed.security.controller.auth');
 
@@ -38,7 +37,7 @@ class SecurityServiceProvider extends ServiceProvider
 
     private function resolveTargetEntity()
     {
-        /** @var \Omed\Laravel\ORM\Resolvers\TargetEntityResolver $resolver */
+        /** @var TargetEntityResolver $resolver */
         $resolver = $this->app->get(TargetEntityResolver::class);
         $resolver->addResolveTargetEntity(
             TokenModelInterface::class,
