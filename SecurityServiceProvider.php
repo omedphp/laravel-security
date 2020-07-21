@@ -16,7 +16,6 @@ namespace Omed\Laravel\Security;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Kilip\SanctumORM\Contracts\TokenModelInterface;
-use Omed\Laravel\ORM\Resolvers\TargetEntityResolver;
 use Omed\Laravel\Security\Controller\AuthController;
 use Omed\Laravel\Security\Model\Tokens;
 
@@ -27,32 +26,39 @@ class SecurityServiceProvider extends ServiceProvider
         $app->alias(AuthController::class, 'omed.security.controller.auth');
 
         $this->loadRoutesFrom(__DIR__.'/Resources/routes/api.php');
-        $this->resolveTargetEntity();
-        $this->registerDoctrine();
     }
 
     public function register()
     {
+        $this->configureModel();
     }
 
-    private function resolveTargetEntity()
+    private function configureModel()
     {
-        /** @var TargetEntityResolver $resolver */
-        $resolver = $this->app->get(TargetEntityResolver::class);
-        $resolver->addResolveTargetEntity(
-            TokenModelInterface::class,
-            Tokens::class,
-            []
-        );
-    }
-
-    private function registerDoctrine()
-    {
+        $mappings = [
+            __NAMESPACE__.'\\Model' => [
+                'type' => 'annotation',
+                'dir' => __DIR__.'/Model',
+            ],
+        ];
+        $key = 'doctrine.managers.'.config('omed_security.entity_manager_name', 'default').'.mappings';
+        $mappings = array_merge($mappings, config($key, []));
         config([
-            'doctrine.managers.default.paths' => array_merge(
-                [__DIR__.'/Model'],
-                config('doctrine.managers.default.paths', [])
+            $key => $mappings,
+        ]);
+
+        // configure target entities
+        $resolves = config('doctrine.resolve_target_entities', []);
+        $resolves = array_merge([
+            TokenModelInterface::class => Tokens::class,
+        ], $resolves);
+
+        config([
+            'doctrine.resolve_target_entities' => array_merge(
+                $resolves,
+                config('doctrine.resolve_target_entities', [])
             ),
+            'sanctum.orm.models.token' => Tokens::class,
         ]);
     }
 }

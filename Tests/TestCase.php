@@ -13,11 +13,11 @@ declare(strict_types=1);
 
 namespace Omed\Laravel\Security\Tests;
 
+use Kilip\LaravelDoctrine\ORM\KilipDoctrineServiceProvider;
 use Kilip\SanctumORM\SanctumORMServiceProvider;
 use Laravel\Sanctum\SanctumServiceProvider;
 use LaravelDoctrine\Extensions\GedmoExtensionsServiceProvider;
 use LaravelDoctrine\ORM\DoctrineServiceProvider;
-use Omed\Laravel\ORM\ORMServiceProvider;
 use Omed\Laravel\Security\Model\Tokens;
 use Omed\Laravel\Security\SecurityServiceProvider;
 use Omed\Laravel\Security\Tests\Resources\Model\TestSecurityUser;
@@ -37,7 +37,7 @@ class TestCase extends BaseTestCase
         return [
             DoctrineServiceProvider::class,
             GedmoExtensionsServiceProvider::class,
-            ORMServiceProvider::class,
+            KilipDoctrineServiceProvider::class,
             SanctumServiceProvider::class,
             SanctumORMServiceProvider::class,
             SecurityServiceProvider::class,
@@ -55,8 +55,8 @@ class TestCase extends BaseTestCase
 
         $config->set('auth.providers.users.driver', 'doctrine');
         $config->set('auth.providers.users.model', TestSecurityUser::class);
-        $config->set('sanctum_orm.doctrine.models.token', Tokens::class);
-        $config->set('sanctum_orm.doctrine.models.user', TestSecurityUser::class);
+        $config->set('sanctum.orm.models.token', Tokens::class);
+        $config->set('sanctum.orm.models.user', TestSecurityUser::class);
     }
 
     protected function resolveApplicationHttpKernel($app)

@@ -15,13 +15,12 @@ namespace Omed\Laravel\Security\Testing;
 
 use Doctrine\Persistence\ObjectManager;
 use Illuminate\Support\Facades\Hash;
-use LaravelDoctrine\ORM\IlluminateRegistry;
-use Omed\Laravel\ORM\Testing\DatabaseTestTrait;
+use Kilip\LaravelDoctrine\ORM\Testing\ORMTestTrait;
 use Omed\Laravel\Security\Model\SecurityUserInterface;
 
 trait AuthTestTrait
 {
-    use DatabaseTestTrait;
+    use ORMTestTrait;
 
     /**
      * @param string $username
@@ -52,7 +51,7 @@ trait AuthTestTrait
 
     protected function getRepositoryForUser()
     {
-        return $this->getManagerForUser()->getRepository($this->getUserModel());
+        return $this->getRepository($this->getUserModel());
     }
 
     /**
@@ -60,15 +59,7 @@ trait AuthTestTrait
      */
     protected function getManagerForUser()
     {
-        return $this->getRegistry()->getManagerForClass($this->getUserModel());
-    }
-
-    /**
-     * @return IlluminateRegistry
-     */
-    protected function getRegistry()
-    {
-        return app()->get('registry');
+        return $this->getManagerForClass($this->getUserModel());
     }
 
     /**

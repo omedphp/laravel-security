@@ -12,6 +12,7 @@
 declare(strict_types=1);
 
 return [
+    'entity_manager_name' => 'default',
     'model' => [
         'user' => config('auth.providers.users.model'),
     ],

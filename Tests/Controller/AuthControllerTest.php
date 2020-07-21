@@ -22,7 +22,6 @@ class AuthControllerTest extends TestCase
 
     public function testLogin()
     {
-        $config = config();
         $this->createUser();
         $response = $this->post(route('omed.security.routes.login'), [
             'usernameOrEmail' => 'test@example.com',
@@ -33,5 +32,17 @@ class AuthControllerTest extends TestCase
 
         $token = $response->json('plainTextToken');
         $this->assertNotNull($token);
+    }
+
+    public function testFailedLogin()
+    {
+        $this->createUser();
+        $response = $this->post(route('omed.security.routes.login'), [
+            'usernameOrEmail' => 'test@example.com',
+            'password' => 'foo',
+        ]);
+        $response->assertStatus(401);
+        $this->assertIsArray($response->json('usernameOrEmail'));
+        $this->assertContains('The provided credentials are incorrect.', $response->json('usernameOrEmail'));
     }
 }

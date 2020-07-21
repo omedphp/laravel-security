@@ -26,8 +26,6 @@ class AuthController extends Controller
      * @param Request               $request
      * @param TokenManagerInterface $tokenManager
      *
-     * @throws ValidationException when credentials is incorrect
-     *
      * @return JsonResponse
      */
     public function login(Request $request, TokenManagerInterface $tokenManager)
@@ -44,7 +42,9 @@ class AuthController extends Controller
         $user = $tokenManager->findUserByUsernameOrEmail($usernameOrEmail);
 
         if (!$user || !Hash::check($password, $user->getPassword())) {
-            throw ValidationException::withMessages(['usernameOrEmail' => ['The provided credentials are incorrect.']]);
+            $exception = ValidationException::withMessages(['usernameOrEmail' => ['The provided credentials are incorrect.']]);
+
+            return response()->json($exception->validator->getMessageBag()->toArray(), 401);
         }
 
         $newToken = $tokenManager->createToken($user, $tokenName);

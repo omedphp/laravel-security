@@ -27,8 +27,8 @@
     },
     "require": {
         "php": "^7.2",
-        "kilip/sanctum-orm": "^1.0@dev",
-        "omed/laravel-orm": "^1.0@dev"
+        "kilip/laravel-doctrine-orm": "^1.0@dev",
+        "kilip/sanctum-orm": "^1.0@dev"
     },
     "require-dev": {
         "gedmo/doctrine-extensions": "^2.4",
