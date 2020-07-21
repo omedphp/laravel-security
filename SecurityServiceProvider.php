@@ -25,6 +25,7 @@ class SecurityServiceProvider extends ServiceProvider
     {
         $app->alias(AuthController::class, 'omed.security.controller.auth');
 
+        $app['config']->set('auth.guards.api.driver','sanctum');
         $this->loadRoutesFrom(__DIR__.'/Resources/routes/api.php');
     }
 
