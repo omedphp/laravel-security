@@ -18,6 +18,11 @@
     "extra": {
         "branch-alias": {
             "dev-master": "1.0-dev"
+        },
+        "laravel": {
+            "providers": [
+                "Omed\\Laravel\\Security\\SecurityServiceProvider"
+            ]
         }
     },
     "autoload": {
@@ -27,11 +32,10 @@
     },
     "require": {
         "php": "^7.2",
-        "kilip/laravel-doctrine-orm": "^1.0@dev",
-        "kilip/sanctum-orm": "^1.0@dev"
+        "kilip/sanctum-orm": "^1.0@dev",
+        "omed/laravel-core": "^1.0@dev"
     },
     "require-dev": {
-        "gedmo/doctrine-extensions": "^2.4",
         "orchestra/testbench": "^5.0",
         "phpunit/phpunit": "^8.5.8"
     }
